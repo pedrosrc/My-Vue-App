@@ -24,15 +24,26 @@ const members = reactive<MembersProps[]>([
   }
 ])
 
-const newMember = reactive({
-  id: Number(Date.now()),
+let newMember = reactive({
+  id: Number(Date.now() + Math.random() * 30),
   fname: '',
   lname: '',
   instrument: ''
 })
 
-async function addMember(){
-  members.push(newMember);
+function addMember() {
+  if (newMember.fname && newMember.lname && newMember.instrument) {
+    members.push(newMember);
+    newMember = reactive({
+      id: Number(Date.now()),
+      fname: '',
+      lname: '',
+      instrument: ''
+    })
+  }else{
+    return alert("Fields must be filled. Try Again!");
+  }
+  
 }
 
 </script>
@@ -63,7 +74,6 @@ async function addMember(){
     <section class="add-more">
       <p>Add more band members</p>
       <form>
-
         <label for="fname">First name:</label><br>
         <input type="text" id="fname" name="fname" v-model="newMember.fname"><br>
 
@@ -85,10 +95,17 @@ async function addMember(){
 </template>
 
 <style scoped>
+
+@import url('https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter&family=Metal+Mania&display=swap');
+
 .container {
   text-align: center;
   padding: 45px;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+}
+.container h1{
+  font-family: 'Metal Mania';
 }
 
 .container table {
@@ -122,6 +139,7 @@ async function addMember(){
 }
 
 section.add-more {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   background-color: rgb(241, 241, 241);
   padding: 40px;
   margin-top: 40px;
