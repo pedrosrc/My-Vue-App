@@ -3,8 +3,15 @@
 import { onMounted, reactive, computed, ref } from "vue";
 import axios from 'axios';
 
+interface resultsProps{
+  questions: string,
+  incorrectAnswers: string,
+  correctAnswer: string,
+  chosenAnswer: undefined,
+  answerSubmitedd: boolean
+}
 
-let results: any = reactive({
+let results: resultsProps = reactive({
   questions: "",
   incorrectAnswers: "",
   correctAnswer: "",
@@ -14,8 +21,12 @@ let results: any = reactive({
 
 const result = ref('')
 
+async function getQuestion(){
 
-onMounted(async () => {
+  results.questions = ""
+  results.chosenAnswer = undefined
+  results.answerSubmitedd = false
+
   await axios.get("https://opentdb.com/api.php?amount=10")
     .then((response) => {
       results.questions = response.data.results[0].question;
@@ -24,7 +35,11 @@ onMounted(async () => {
     }).catch((error) => {
       console.log(error)
     });
-})
+}
+
+onMounted(() => {
+  getQuestion()
+});
 
 const answer = computed(() => {
   var answer2 = [...results.incorrectAnswers]
@@ -81,7 +96,7 @@ async function submitAnswer() {
           <span v-html="result"></span>
 
 
-          <button @click="submitAnswer" class="send" type="button">Next Question</button>
+          <button @click="getQuestion" class="send" type="button">Next Question</button>
         </section>
         
 
