@@ -1,14 +1,20 @@
 <script setup lang="ts">
 
+import ScoreBoard from '@/components/ScoreBoard.vue'
+import ResultTotal from './components/ResultTotal.vue';
 import { onMounted, reactive, computed, ref } from "vue";
 import axios from 'axios';
 
-interface resultsProps{
+interface resultsProps {
   questions: string,
   incorrectAnswers: string,
   correctAnswer: string,
   chosenAnswer: undefined,
-  answerSubmitedd: boolean
+  answerSubmitedd: boolean,
+  winCount: number,
+  loseCount: number,
+  tryAgain: boolean,
+  resultTotal: boolean
 }
 
 let results: resultsProps = reactive({
@@ -16,12 +22,16 @@ let results: resultsProps = reactive({
   incorrectAnswers: "",
   correctAnswer: "",
   chosenAnswer: undefined,
-  answerSubmitedd: false
+  answerSubmitedd: false,
+  winCount: 0,
+  loseCount: 0,
+  tryAgain: false,
+  resultTotal: false
 })
 
 const result = ref('')
 
-async function getQuestion(){
+async function getQuestion() {
 
   results.questions = ""
   results.chosenAnswer = undefined
@@ -56,14 +66,20 @@ async function submitAnswer() {
     const itemCorrect = results.correctAnswer
 
     results.answerSubmitedd = true;
+    if (results.winCount + results.loseCount === 9) {
+      results.tryAgain = true
+    } else if (results.winCount > results.loseCount) {
+      results.resultTotal = true
+    }
 
     if (itemSelect === itemCorrect) {
+      results.winCount++
       return result.value = `&#9989 Congratulations. The correct item is: ${itemCorrect}`
     } else {
+      results.loseCount++
       return result.value = `&#10060; Error. The correct item is: ${itemCorrect}`
     }
   }
-
 
 
 }
@@ -78,9 +94,12 @@ async function submitAnswer() {
       </header>
 
       <main>
+        <ResultTotal v-if="results.tryAgain" :resultTotal="results.resultTotal" />
+        <ScoreBoard :winCount="results.winCount" :loseCount="results.loseCount" />
         <section class="question">
           <h1 v-html="results.questions"></h1>
         </section>
+
 
         <template v-for="(answers, index) in answer" :key="index">
           <div class="items">
@@ -88,7 +107,7 @@ async function submitAnswer() {
             <label v-html="answers"></label><br>
           </div>
         </template>
-        <section  v-if="!results.answerSubmitedd" class="result">
+        <section v-if="!results.answerSubmitedd" class="result">
           <button @click="submitAnswer" class="send" type="button">Send</button>
         </section>
 
@@ -98,9 +117,6 @@ async function submitAnswer() {
 
           <button @click="getQuestion" class="send" type="button">Next Question</button>
         </section>
-        
-
-        
 
       </main>
     </template>
@@ -125,6 +141,7 @@ header h1 {
   border-radius: 20px;
   color: #00a8e8;
   font-size: 3rem;
+  border: 3px solid black;
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 }
 
@@ -144,13 +161,18 @@ main {
 }
 
 .items {
+  width: 100%;
+  padding: 15px;
+  border-radius: 15px;
   margin: 5px;
   font-size: 1.2rem;
   text-align: center;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
 .items input {
   cursor: pointer;
+  border: none;
 }
 
 .result {
